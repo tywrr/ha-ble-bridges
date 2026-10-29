@@ -1,0 +1,81 @@
+# ESP32-C6 (tested on an M5Stack NanoC6) as an ESPHome Bluetooth proxy for Home Assistant.
+#
+# HA's built-in SwitchBot integration reaches the Bot through this proxy (it supports
+# active connections, not just advertisement sniffing), so the HA host needs no
+# Bluetooth adapter at all. Derived from esphome/bluetooth-proxies esp32-generic-c6.yaml.
+#
+# Secrets come from secrets.yaml next to this file (gitignored; copy secrets.example.yaml).
+# First flash over USB:  uvx esphome==2026.10.1 run ble-proxy-esp32c6.yaml --device /dev/ttyACM0
+# Later updates go OTA:  uvx esphome==2026.10.1 run ble-proxy-esp32c6.yaml
+
+substitutions:
+  name: ble-proxy-esp32c6
+  friendly_name: BLE Proxy ESP32-C6
+  # M5Stack NanoC6 blue LED. Change or remove the status_led block for other boards.
+  status_led_pin: GPIO7
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  min_version: 2025.8.0
+
+esp32:
+  board: esp32-c6-devkitc-1
+  variant: esp32c6
+  flash_size: 4MB
+  framework:
+    type: esp-idf
+
+wifi:
+  # The ESP32-C6 is 2.4 GHz only. Point it at a 2.4 GHz SSID; a 5/6 GHz-only
+  # network will never be found and the device will sit in the fallback AP forever.
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  # Fallback hotspot (SSID defaults to the device name) if the network is unreachable
+  ap:
+    password: !secret fallback_ap_password
+
+# Makes the fallback AP useful: a phone joining it gets a page to enter new Wi-Fi credentials
+captive_portal:
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+ota:
+  - platform: esphome
+    id: ota_esphome
+    password: !secret ota_password
+
+logger:
+
+esp32_ble_tracker:
+  scan_parameters:
+    # Keep upstream's default interval/window so BLE co-exists with Wi-Fi on the shared radio
+    active: true
+
+bluetooth_proxy:
+  # active: true lets HA open GATT connections through the proxy, which the
+  # SwitchBot Bot needs (a press is a characteristic write, not a passive read).
+  active: true
+
+# Blinks while Wi-Fi/API is down, off when healthy
+status_led:
+  pin: ${status_led_pin}
+
+sensor:
+  - platform: wifi_signal
+    name: Wi-Fi Signal
+    update_interval: 60s
+  - platform: uptime
+    name: Uptime
+
+button:
+  - platform: restart
+    name: Restart
+  - platform: safe_mode
+    id: button_safe_mode
+    name: Safe Mode Boot
+  - platform: factory_reset
+    id: factory_reset_btn
+    name: Factory reset

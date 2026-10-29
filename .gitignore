@@ -1,0 +1,14 @@
+# Rust
+options/02-rust-rest-bridge/target/
+**/*.rs.bk
+
+# ESPHome: real secrets and build output
+options/03-esphome-bluetooth-proxy/secrets.yaml
+options/03-esphome-bluetooth-proxy/.esphome/
+secrets.yaml
+
+# Editors / OS
+*.swp
+.DS_Store
+.idea/
+.vscode/

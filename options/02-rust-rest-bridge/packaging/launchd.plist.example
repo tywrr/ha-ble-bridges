@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  launchd user agent for switchbot-bridge on macOS.
+
+  1. Replace every __PATH_TO_...__ placeholder with absolute paths on your Mac.
+  2. Copy to ~/Library/LaunchAgents/io.github.tywrr.switchbot-bridge.plist
+  3. launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/io.github.tywrr.switchbot-bridge.plist
+     (unload later with: launchctl bootout gui/$(id -u)/io.github.tywrr.switchbot-bridge)
+
+  Run it as a *user* agent (gui/<uid>), not a LaunchDaemon: CoreBluetooth needs a
+  logged-in user session for the TCC Bluetooth permission to apply.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>io.github.tywrr.switchbot-bridge</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>__PATH_TO_REPO__/options/02-rust-rest-bridge/target/release/switchbot-bridge</string>
+        <string>serve</string>
+        <string>--host</string>
+        <string>0.0.0.0</string>
+        <string>--port</string>
+        <string>8080</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>__PATH_TO_LOG_DIR__/switchbot-bridge.log</string>
+    <key>StandardErrorPath</key>
+    <string>__PATH_TO_LOG_DIR__/switchbot-bridge.err.log</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>RUST_LOG</key>
+        <string>switchbot_bridge=info,info</string>
+    </dict>
+</dict>
+</plist>

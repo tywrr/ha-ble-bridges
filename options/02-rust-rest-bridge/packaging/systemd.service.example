@@ -1,0 +1,32 @@
+# systemd unit for switchbot-bridge on a Linux host with a BlueZ-managed adapter.
+#
+# 1. Replace <PATH_TO_BINARY> and <SERVICE_USER>.
+# 2. The service user needs access to the BlueZ D-Bus API: on most distributions
+#    membership in the "bluetooth" group is enough (check /etc/dbus-1/system.d/bluetooth.conf).
+# 3. sudo cp systemd.service.example /etc/systemd/system/switchbot-bridge.service
+#    sudo systemctl daemon-reload && sudo systemctl enable --now switchbot-bridge
+#
+# The bridge has no authentication: bind to a LAN address and firewall the port,
+# or keep --host 127.0.0.1 and put it behind a reverse proxy you trust.
+
+[Unit]
+Description=SwitchBot BLE bridge (REST API for Home Assistant)
+After=bluetooth.target network-online.target
+Wants=bluetooth.target network-online.target
+
+[Service]
+Type=simple
+User=<SERVICE_USER>
+ExecStart=<PATH_TO_BINARY>/switchbot-bridge serve --host 0.0.0.0 --port 8080
+Environment=RUST_LOG=switchbot_bridge=info,info
+Restart=on-failure
+RestartSec=5
+
+# Hardening that still allows D-Bus access to BlueZ.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

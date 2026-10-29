@@ -1,0 +1,58 @@
+# Rust option: fmt, clippy (warnings are errors), build.
+# ESPHome option: `esphome config` validation with throwaway secrets.
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  rust:
+    name: rust rest bridge
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: options/02-rust-rest-bridge
+    steps:
+      - uses: actions/checkout@v4
+      - name: BlueZ / D-Bus headers for the btleplug Linux backend
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libdbus-1-dev pkg-config
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: options/02-rust-rest-bridge
+      - run: cargo fmt --check
+      - run: cargo clippy --all-targets --locked -- -D warnings
+      - run: cargo build --locked
+
+  esphome:
+    name: esphome config
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: options/03-esphome-bluetooth-proxy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Write throwaway secrets so !secret references resolve
+        run: |
+          cat > secrets.yaml <<EOF
+          wifi_ssid: "ci-2g"
+          wifi_password: "ci-password"
+          fallback_ap_password: "ci-fallback"
+          api_encryption_key: "$(openssl rand -base64 32)"
+          ota_password: "ci-ota"
+          EOF
+      - name: esphome config (validation only, no toolchain download)
+        run: |
+          if uvx esphome==2026.10.1 config ble-proxy-esp32c6.yaml; then
+            echo "ESPHome config valid"
+          else
+            echo "::warning::esphome config validation failed or could not run; check the log"
+            exit 1
+          fi

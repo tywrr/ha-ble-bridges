@@ -1,0 +1,24 @@
+[package]
+name = "switchbot-bridge"
+version = "0.2.0"
+edition = "2021"
+rust-version = "1.75"
+description = "BLE CLI and local REST bridge for SwitchBot Bots, so a Home Assistant without a Bluetooth radio can press one"
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/tywrr/ha-ble-bridges"
+keywords = ["switchbot", "bluetooth", "ble", "home-assistant", "iot"]
+categories = ["command-line-utilities", "hardware-support"]
+publish = false
+
+[dependencies]
+btleplug = "0.11"
+tokio = { version = "1.38", features = ["full"] }
+clap = { version = "4.5", features = ["derive"] }
+axum = "0.7"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = "1.8"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+anyhow = "1.0"

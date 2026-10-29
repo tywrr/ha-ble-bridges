@@ -1,0 +1,34 @@
+# Home Assistant configuration.yaml snippet for the Rust REST bridge.
+#
+# Replace <BRIDGE_HOST> with the LAN hostname or address of the machine running
+# `switchbot-bridge serve`. Give the bridge host a DHCP reservation or a stable
+# mDNS name; HA cannot press anything if the address drifts.
+#
+# The bridge retries discovery and the write up to three times, so a single call
+# can take 20+ seconds before it answers. The timeout below must cover that.
+rest_command:
+  switchbot_bot_press:
+    url: "http://<BRIDGE_HOST>:8080/press"
+    method: POST
+    timeout: 30
+  switchbot_bot_on:
+    url: "http://<BRIDGE_HOST>:8080/on"
+    method: POST
+    timeout: 30
+  switchbot_bot_off:
+    url: "http://<BRIDGE_HOST>:8080/off"
+    method: POST
+    timeout: 30
+
+# Targeting one Bot when several are in range: the bridge matches a substring of
+# the advertised name or the OS-assigned peripheral ID, which you can read from
+# `switchbot-bridge scan`.
+#
+#   switchbot_bot_press_specific:
+#     url: "http://<BRIDGE_HOST>:8080/press?device=<NAME_OR_ID_SUBSTRING>"
+#     method: POST
+#     timeout: 30
+#
+# Do not trust the HTTP 200 as proof that the appliance switched. See
+# ../../docs/verification-pattern.md for the automation that confirms the press
+# with a power-monitoring plug.
