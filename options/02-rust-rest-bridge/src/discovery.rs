@@ -7,6 +7,13 @@ use tracing::info;
 
 use crate::bot::SWITCHBOT_SERVICE_UUID;
 
+/// A SwitchBot Bot advertises the SwitchBot service UUID or the local name
+/// "WoHand". Matching on a bare "bot" substring also catches robot vacuums and
+/// chatbots, so don't.
+fn is_switchbot_bot(services: &[uuid::Uuid], name: &str) -> bool {
+    services.contains(&SWITCHBOT_SERVICE_UUID) || name.starts_with("WoHand")
+}
+
 #[derive(Debug, Clone)]
 pub struct DiscoveredBot {
     pub id: String,
@@ -66,11 +73,7 @@ pub async fn scan_bots(duration: Duration) -> Result<Vec<DiscoveredBot>> {
     for p in &peripherals {
         if let Ok(Some(props)) = p.properties().await {
             let name = props.local_name.clone().unwrap_or_default();
-            let has_service = props.services.contains(&SWITCHBOT_SERVICE_UUID);
-            let is_switchbot = has_service
-                || name.to_lowercase().contains("wohand")
-                || name.to_lowercase().contains("bot")
-                || name.to_lowercase().contains("switchbot");
+            let is_switchbot = is_switchbot_bot(&props.services, &name);
 
             tracing::debug!(
                 "Peripheral id={}, name='{}', services={:?}, rssi={:?}",
@@ -121,8 +124,7 @@ pub async fn find_target_bot(filter: Option<&str>, timeout: Duration) -> Result<
             if let Ok(Some(props)) = p.properties().await {
                 let name = props.local_name.clone().unwrap_or_default();
                 let id_str = p.id().to_string();
-                let has_service = props.services.contains(&SWITCHBOT_SERVICE_UUID);
-                let is_bot = has_service || name.contains("WoHand") || name.contains("Bot");
+                let is_bot = is_switchbot_bot(&props.services, &name);
 
                 if !is_bot {
                     continue;

@@ -18,12 +18,13 @@ docs/                               Bot protocol, the verification pattern, trou
 
 1. **HAOS on an Intel NUC.** The NUC had an onboard Bluetooth adapter. HA's
    Bluetooth integration found it, the SwitchBot integration found the Bot,
-   done. It ran like that for about a year. The only lesson from this period
+   done. It ran like that for a few months. The only lesson from this period
    was that a press at the edge of range sometimes did not land, which is
    where the [verification pattern](docs/verification-pattern.md) comes from.
 2. **HA in a container on a Kubernetes node, no radio.** The move off HAOS put
-   HA in a pod on a box with no Bluetooth, in a network cupboard a floor away
-   from the Bot. Passing a USB dongle into the pod was
+   HA in a pod on an immutable Kubernetes OS with no BlueZ (the onboard radio
+   was unusable), then on an ARM board with no radio at all. Either way the
+   host was a floor away from the Bot. Passing a USB dongle into the pod was
    [researched](options/01-local-adapter/README.md#1b-usb-dongle-passed-into-a-container-or-pod-researched-not-tested)
    and rejected: it needs `hostNetwork`, privileged, the host's D-Bus socket,
    pins the pod to one node, and the dongle would still have been a floor
@@ -31,10 +32,11 @@ docs/                               Bot protocol, the verification pattern, trou
 3. **A laptop as a REST bridge.** A MacBook that lived within range got a
    [small Rust service](options/02-rust-rest-bridge/): `POST /press` over
    HTTP in, a three-byte BLE write out, with retries. HA called it through
-   `rest_command`. It worked for a month and taught a lot about macOS TCC.
+   `rest_command`. It worked for six weeks and taught a lot about macOS TCC.
    It was also a laptop, so it slept, updated, and got unplugged.
-4. **A $6 ESP32-C6 running ESPHome as a Bluetooth proxy.** Plugged into a USB
-   charger near the Bot, it shows up in HA as a Bluetooth adapter. HA's
+4. **A $6 ESP32-C6 running ESPHome as a Bluetooth proxy.** Powered from the
+   HA host's USB port (still a floor from the Bot, about -80 dBm), it shows up
+   in HA as a Bluetooth adapter. Put it next to the Bot if you can. HA's
    native SwitchBot integration comes back, with battery and RSSI, and the
    laptop goes back to being a laptop. [This is the one.](options/03-esphome-bluetooth-proxy/)
 
@@ -43,17 +45,18 @@ docs/                               Bot protocol, the verification pattern, trou
 | | 1a. HAOS onboard adapter | 1b. USB dongle in container/pod | 2. Rust REST bridge | 3. ESPHome proxy (ESP32-C6) |
 | --- | --- | --- | --- | --- |
 | Press latency (request to arm moving) | ~1 s | ~1 s (expected) | 2 to 6 s, up to 25 s with retries | 1 to 2 s |
-| Reliability in this setup | Good when in range; range is the server's location | Untested | Good while the host is awake; host sleep/updates were the failure mode | Best; the proxy sits next to the Bot |
+| Reliability in this setup | Good when in range; range is the server's location | Untested | Good while the host is awake; host sleep/updates were the failure mode | Best so far, even a floor away; a proxy can go wherever there is USB power |
 | Extra hardware cost | $0 if the host has a radio | $10 to $20 dongle (+ extension cable) | $0 if you already own a Mac/Linux box near the Bot | $6 to $10 |
 | Setup effort | None | Medium: BlueZ on host, D-Bus mount, privileged, hostNetwork, node pinning | Medium: build, TCC dance, launchd/systemd, `rest_command` | Low: flash once over USB, accept in HA |
 | Works without cloud | Yes | Yes | Yes | Yes |
 | Keeps HA's native SwitchBot integration | Yes | Yes | **No** (HA sees only a `rest_command`; no battery, no feedback) | Yes |
 | Needs the HA pod/container changed | No | Yes | No | No |
 | Something else to keep alive | No | The dongle and host BlueZ | A general-purpose OS | A microcontroller with no OS |
-| Status in this repo | Tested (a year) | Researched, not tested | Tested (a month), retired | Tested, in production |
+| Status in this repo | Tested (a few months) | Researched, not tested | Tested (six weeks), retired | Tested, in production since late October 2026 |
 
-Latency figures are from this installation, with the Bot at -70 to -80 dBm.
-Yours will differ; the ordering will not.
+Latency figures are rough observations from a handful of presses in this
+installation, with the Bot at -70 to -80 dBm, not measurements. Yours will
+differ; the ordering probably will not.
 
 ## Which should I pick
 
@@ -111,4 +114,4 @@ on/off direction logic, is in [`docs/verification-pattern.md`](docs/verification
 Dual-licensed under [MIT](LICENSE-MIT) or [Apache 2.0](LICENSE-APACHE), at
 your option. The ESPHome config is derived from the
 [esphome/bluetooth-proxies](https://github.com/esphome/bluetooth-proxies)
-templates (MIT).
+templates (Apache-2.0).

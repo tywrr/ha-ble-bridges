@@ -21,11 +21,11 @@ What worked:
 
 What to know:
 
-* Range is wherever the server lives. A NUC in a cupboard under the stairs
-  hears a Bot in the next room but not one on the floor above. The
-  verification pattern in [`docs/verification-pattern.md`](../../docs/verification-pattern.md)
-  was first written for this setup, because about one press in forty did not
-  register at the edge of range.
+* Range is wherever the server lives, and the Bot's coin-cell radio is the
+  weak end. The verification pattern in
+  [`docs/verification-pattern.md`](../../docs/verification-pattern.md) was
+  first written for this setup, because presses at the edge of range
+  sometimes did not register.
 * Intel combo cards share the antenna between Wi-Fi and BLE. If the host
   also uses Wi-Fi heavily, BLE scans get patchy. Wired Ethernet for the host
   fixes it.
@@ -85,10 +85,9 @@ owns the adapter outright and the node's own stack must be disabled.
 
 ### Why it was rejected here
 
-* The HA host in question (an ARM single-board computer in a network
-  cupboard) had no Bluetooth and sat too far from the Bot for a dongle on it
-  to help. A USB extension cable through a wall was the honest version of
-  this plan.
+* The HA host in question (an ARM single-board computer) had no Bluetooth
+  and sat a floor away from the Bot, too far for a dongle on it to help. A
+  long USB extension cable was the honest version of this plan.
 * The pod was already `hostNetwork` and privileged for Matter and mDNS, so
   the security cost was already paid, but adding a USB device made the pod
   non-schedulable anywhere else and tied Bluetooth recovery to node reboots.

@@ -77,11 +77,13 @@ This repo is about the Bot only.
 The Bot's service data (on the 16-bit UUID `0x0D00` under company/service
 `0xFD3D` on newer firmware, or the 128-bit service above) carries:
 
-| Byte | Meaning                                        |
-| ---- | ---------------------------------------------- |
-| 0    | Device type, `H` (`0x48`) for Bot              |
-| 1    | Bit 7: encrypted/password flag, bit 6: dual-state (switch mode), bit 0: arm state |
-| 2    | Battery percentage (low 7 bits)                |
+| Byte | Meaning                                                                 |
+| ---- | ----------------------------------------------------------------------- |
+| 0    | Bit 7: encryption flag; bits 6:0: device type, `H` (`0x48`) for Bot     |
+| 1    | Bit 7: switch mode (0 = press/one-state, 1 = on/off); bit 6: state (inverted: 0 = on); bit 5: encryption type |
+| 2    | Bit 7: sync-UTC flag; bits 6:0: battery percentage                      |
+
+(Per SwitchBot's published BLE spec and pySwitchbot's Bot advertisement parser.)
 
 HA shows the battery sensor and the "on" state straight from this, which is
 why the ESPHome proxy option gives you battery for free: it needs no

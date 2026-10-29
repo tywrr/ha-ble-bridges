@@ -1,6 +1,6 @@
 # Troubleshooting
 
-Collected from a year of pressing one button. Grouped by where the problem
+Collected from a few months of pressing one button. Grouped by where the problem
 usually turns out to be.
 
 ## Radio and range
@@ -15,8 +15,8 @@ usually turns out to be.
 | < -85      | Discovery timeouts, "device unavailable" flapping                 |
 
 Move the proxy or bridge host, not the Bot. A Bot is a coin cell behind a
-plastic shell stuck to an appliance; its radio is the weak end. One room away
-through a stud wall was fine; two rooms or a floor was not.
+plastic shell stuck to an appliance; its radio is the weak end. As a rough
+guide, one room away is usually fine and a floor away is marginal.
 
 **Neighbours' devices in scans.** `scan --all` and HA's Bluetooth page will
 show every advertising device in range, including things in the flat next

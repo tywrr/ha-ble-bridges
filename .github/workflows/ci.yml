@@ -49,10 +49,4 @@ jobs:
           ota_password: "ci-ota"
           EOF
       - name: esphome config (validation only, no toolchain download)
-        run: |
-          if uvx esphome==2026.10.1 config ble-proxy-esp32c6.yaml; then
-            echo "ESPHome config valid"
-          else
-            echo "::warning::esphome config validation failed or could not run; check the log"
-            exit 1
-          fi
+        run: uvx esphome==2026.10.1 config ble-proxy-esp32c6.yaml

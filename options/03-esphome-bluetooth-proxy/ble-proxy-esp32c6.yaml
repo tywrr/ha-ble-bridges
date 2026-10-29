@@ -2,7 +2,10 @@
 #
 # HA's built-in SwitchBot integration reaches the Bot through this proxy (it supports
 # active connections, not just advertisement sniffing), so the HA host needs no
-# Bluetooth adapter at all. Derived from esphome/bluetooth-proxies esp32-generic-c6.yaml.
+# Bluetooth adapter at all.
+#
+# Derived from esphome/bluetooth-proxies esp32-generic-c6.yaml (Apache-2.0,
+# https://github.com/esphome/bluetooth-proxies).
 #
 # Secrets come from secrets.yaml next to this file (gitignored; copy secrets.example.yaml).
 # First flash over USB:  uvx esphome==2026.10.1 run ble-proxy-esp32c6.yaml --device /dev/ttyACM0
